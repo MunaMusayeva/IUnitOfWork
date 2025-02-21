@@ -6,7 +6,7 @@ public interface IProductRepository
 {
     Task AddAsync(Product product);
     void Update(Product product);
-    bool Delete(int id, int deletedBy);
+    Task Remove(int id);
     IQueryable<Product> GetAll();
     Task<Product> GetByIdAsync(int id);
 }

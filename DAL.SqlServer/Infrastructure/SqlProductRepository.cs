@@ -1,39 +1,41 @@
 ﻿using DAL.SqlServer.Context;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Repository.Repositories;
 
 namespace DAL.SqlServer.Infrastructure;
 
-public class SqlProductRepository : BaseSqlRepository, IProductRepository
+public class SqlProductRepository(AppDbContext context) :IProductRepository
 {
-    private readonly AppDbContext _context ;
-    public SqlProductRepository(string connectionString, AppDbContext context = null) : base(connectionString)
+    private readonly AppDbContext _context = context;
+
+    public async Task AddAsync(Product product)
     {
-        _context = context;
+        await _context.Products.AddAsync(product);
+        await _context.SaveChangesAsync();
     }
 
-    public Task AddAsync(Product product)
+    public async Task Remove(int id)
     {
-        throw new NotImplementedException();
-    }
-
-    public bool Delete(int id, int deletedBy)
-    {
-        throw new NotImplementedException();
+        var product = await _context.Products.FirstOrDefaultAsync(u => u.Id == id);
+        product.IsDeleted = true;
+        product.DeletedDate = DateTime.Now;
+        product.DeletedBy = 0;
     }
 
     public IQueryable<Product> GetAll()
     {
-        throw new NotImplementedException();
+        return _context.Products;
     }
 
-    public Task<Product> GetByIdAsync(int id)
+    public async Task<Product> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return (await _context.Products.FirstOrDefaultAsync(u => u.Id == id))!;
     }
 
     public void Update(Product product)
     {
-        throw new NotImplementedException();
+        product.UpdatedDate = DateTime.Now;
+        _context.Update(product);
     }
 }
